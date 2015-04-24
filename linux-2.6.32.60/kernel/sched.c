@@ -7219,7 +7219,7 @@ SYSCALL_DEFINE0(sched_other_rr_getquantum)
 {
 	return other_rr_time_slice;
 }
-SYSCALL_DEFINE1(sched_other_rr_setquantum, unsigned int, quantum)
+SYSCALL_DEFINE1(sched_other_rr_setquantum, unsigned int quantum)
 {
   other_rr_time_slice = quantum;
   printk("Round Robin Time Quantum has changed");
