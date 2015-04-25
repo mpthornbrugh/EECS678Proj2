@@ -31,10 +31,7 @@ static void update_curr_other_rr(struct rq *rq)
  */
 static void enqueue_task_other_rr(struct rq *rq, struct task_struct *p, int wakeup, bool b)
 {
-  update_curr_other_rr(rq);
-  list_add_tail(&p->other_rr_run_list, &rq->other_rr.queue);
-  rq->other_rr.nr_running = rq->other_rr.nr_running + 1;
-
+	// not yet implemented
 }
 
 static void dequeue_task_other_rr(struct rq *rq, struct task_struct *p, int sleep)
@@ -42,8 +39,7 @@ static void dequeue_task_other_rr(struct rq *rq, struct task_struct *p, int slee
 	// first update the task's runtime statistics
 	update_curr_other_rr(rq);
 
-  list_del(&(p->other_rr_run_list));
-  rq->other_rr.nr_running = rq->other_rr.nr_running - 1;
+	// not yet implemented
 }
 
 /*
@@ -61,7 +57,7 @@ static void requeue_task_other_rr(struct rq *rq, struct task_struct *p)
 static void
 yield_task_other_rr(struct rq *rq)
 {
-  requeue_task_other_rr(rq, rq->curr);
+	// not yet implemented
 }
 
 /*
@@ -83,23 +79,14 @@ static struct task_struct *pick_next_task_other_rr(struct rq *rq)
 
 	// not yet implemented
 
-  if (list_empty(&rq->other_rr.queue)) {
-    next = NULL;
-  }
-  else  {
-    other_rr_rq = &rq->other_rr;
-    queue = &other_rr_rq->queue;
-    next = list_first_entry(queue, struct task_struct, other_rr_run_list);
-    next->se.exec_start = rq->clock;
-  }
-
 	/* after selecting a task, we need to set a timer to maintain correct
 	 * runtime statistics. You can uncomment this line after you have
 	 * written the code to select the appropriate task.
 	 */
+	//next->se.exec_start = rq->clock;
 	
 	/* you need to return the selected task here */
-	return next;
+	return NULL;
 }
 
 static void put_prev_task_other_rr(struct rq *rq, struct task_struct *p)
@@ -189,27 +176,10 @@ move_one_task_other_rr(struct rq *this_rq, int this_cpu, struct rq *busiest,
  */
 static void task_tick_other_rr(struct rq *rq, struct task_struct *p,int queued)
 {
-  struct task_struct *curr;
-  struct other_rr_rq *other_rr_rq;
-
 	// first update the task's runtime statistics
 	update_curr_other_rr(rq);
 
-	if (other_rr_time_slice == 0) {
-    return
-  }
-  else  {
-    if (p->task_time_slice == 0) {
-      requeue_task_other_rr(rq, p);
-      p->task_time_slice = other_rr_time_slice;
-      set_task_need_resched(p);
-      requeue_task_other_rr(rq, p);
-    }
-    else  {
-      p->task_time_slice--;
-    }
-    return;
-  }
+	// not yet implemented
 }
 
 /*

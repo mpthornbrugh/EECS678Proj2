@@ -6504,10 +6504,6 @@ __setscheduler(struct rq *rq, struct task_struct *p, int policy, int prio)
 	case SCHED_RR:
 		p->sched_class = &rt_sched_class;
 		break;
-  case SCHED_OTHER_RR:
-    printk("Other Round Robin Scheduler Set");
-    p->sched_class = &other_rr_sched_class;
-    break;
 	}
 
 	p->rt_priority = prio;
@@ -6556,7 +6552,7 @@ recheck:
 
 		if (policy != SCHED_FIFO && policy != SCHED_RR &&
 		policy != SCHED_NORMAL && policy != SCHED_BATCH &&
-		policy != SCHED_IDLE && policy != SCHED_OTHER_RR)
+		policy != SCHED_IDLE)
 			return -EINVAL;
 	}
 
@@ -7218,12 +7214,6 @@ out_unlock:
 SYSCALL_DEFINE0(sched_other_rr_getquantum)
 {
 	return other_rr_time_slice;
-}
-SYSCALL_DEFINE1(sched_other_rr_setquantum, unsigned int quantum)
-{
-  other_rr_time_slice = quantum;
-  printk("Round Robin Time Quantum has changed");
-  return;
 }
 
 static const char stat_nam[] = TASK_STATE_TO_CHAR_STR;
