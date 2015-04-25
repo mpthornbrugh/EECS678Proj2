@@ -31,7 +31,10 @@ static void update_curr_other_rr(struct rq *rq)
  */
 static void enqueue_task_other_rr(struct rq *rq, struct task_struct *p, int wakeup, bool b)
 {
-	// not yet implemented
+	p->task_time_slice = other_rr_time_slice;
+	list_add_tail( &p->other_rr_run_list, &rq->other_rr.queue );
+	rq->other_rr.nr_running++;
+	printk( "enqueue(): add %ld, n = %ld\n", (unsigned long int)p, rq->other_rr.nr_running );
 }
 
 static void dequeue_task_other_rr(struct rq *rq, struct task_struct *p, int sleep)
@@ -39,7 +42,9 @@ static void dequeue_task_other_rr(struct rq *rq, struct task_struct *p, int slee
 	// first update the task's runtime statistics
 	update_curr_other_rr(rq);
 
-	// not yet implemented
+	list_del( &p->other_rr_run_list );
+	rq->other_rr.nr_running--;
+	printk( "deueue(): del %ld, n = %ld\n", (unsigned long int)p, rq->other_rr.nr_running );
 }
 
 /*
@@ -57,7 +62,8 @@ static void requeue_task_other_rr(struct rq *rq, struct task_struct *p)
 static void
 yield_task_other_rr(struct rq *rq)
 {
-	// not yet implemented
+	printk( "yield() %ld\n", (unsigned long int)rq->curr );
+	requeue_task_other_rr( rq, rq->curr );
 }
 
 /*
@@ -73,20 +79,20 @@ static void check_preempt_curr_other_rr(struct rq *rq, struct task_struct *p, in
  */
 static struct task_struct *pick_next_task_other_rr(struct rq *rq)
 {
-	struct task_struct *next;
-	struct list_head *queue;
-	struct other_rr_rq *other_rr_rq;
+	struct task_struct *next = NULL;
 
-	// not yet implemented
+	if( !list_empty( &rq->other_rr.queue ) )
+	{
+		next = list_entry( rq->other_rr.queue.next, struct task_struct, other_rr_run_list );
 
-	/* after selecting a task, we need to set a timer to maintain correct
-	 * runtime statistics. You can uncomment this line after you have
-	 * written the code to select the appropriate task.
-	 */
-	//next->se.exec_start = rq->clock;
-	
-	/* you need to return the selected task here */
-	return NULL;
+		/* after selecting a task, we need to set a timer to maintain correct
+		 * runtime statistics. You can uncomment this line after you have
+		 * written the code to select the appropriate task.
+		 */
+		next->se.exec_start = rq->clock;
+	}
+
+	return next;
 }
 
 static void put_prev_task_other_rr(struct rq *rq, struct task_struct *p)
@@ -179,7 +185,22 @@ static void task_tick_other_rr(struct rq *rq, struct task_struct *p,int queued)
 	// first update the task's runtime statistics
 	update_curr_other_rr(rq);
 
-	// not yet implemented
+	// If Quantum = 0 do FCFS
+	if( other_rr_time_slice == 0 )
+	{
+		printk( "tick(): task %ld in FCFS.\n", (unsigned long int)p );
+		return;
+	}
+	else
+	{
+		printk( "tick(): task %ld dec slice = %d\n", (unsigned long int)p, p->task_time_slice );
+		if( p->task_time_slice-- == 0 )
+		{
+			p->task_time_slice = other_rr_time_slice;
+			set_tsk_need_resched( p );
+			yield_task_other_rr( rq );
+		}
+	}
 }
 
 /*
